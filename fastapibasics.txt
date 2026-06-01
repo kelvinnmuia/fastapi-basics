@@ -1,2 +1,1 @@
 learning fastapi basic concepts
-fastapi is very fun to learn
