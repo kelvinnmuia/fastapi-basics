@@ -1,1 +1,1 @@
-learning fastapi basic concepts
+learning fastapi basic concepts in 2026
