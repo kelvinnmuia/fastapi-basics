@@ -28,6 +28,20 @@ INSERT INTO products (name, price, inventory) VALUES ('Car', 7000, 10) returning
 -- Insert multiple products into the products table
 INSERT INTO products (name, price, inventory) VALUES ('Bed', 50, 10), ('Mattress', 25, 10) returning id, name, created_at;
 
+/* 
+   update (modify, change) records in the products table
+   The following UPDATE statements demonstrate how to modify existing records in the products table.
+   The RETURNING clause is used to return the updated records for verification.
+*/
+
+-- Update a product's name and inventory in the products table
+
+UPDATE products SET name = 'HP Laptop', inventory = 20 WHERE id = 16 RETURNING *;
+
+-- Updates all products to be on sale and return the updated records
+UPDATE products SET is_sale = true RETURNING *;
+
+
 /*
    The following DELETE statements demonstrate how to remove records from the products table.
    The RETURNING clause is used to return the deleted records for verification.
