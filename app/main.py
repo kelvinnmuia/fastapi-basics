@@ -7,18 +7,32 @@ from random import randrange
 import psycopg2
 from psycopg2.extras import RealDictCursor
 import time
+from sqlalchemy.orm import Session
+from fastapi import Depends
+from . import models
+from .database import engine, sessionlocal
+
+models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+
+def get_db():
+    db = sessionlocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 class Post(BaseModel):
     title: str
     content: str
     published: bool = True
     # rating: Optional[int] = None
+
 while True:
     try:
         conn = psycopg2.connect(host='localhost', database='fastapi', user='postgres', 
-                            password='P0stgres@26', cursor_factory=RealDictCursor)
+                            password='P0stgres26', cursor_factory=RealDictCursor)
         cursor = conn.cursor()
         print("Database connection was successful")
         break
@@ -51,6 +65,11 @@ async def root():
 # @app.get("/posts")
 # async def get_posts():
 #    return {"data": my_posts}
+
+@app.get("/sqlalchemy")
+def test_posts(db: Session = Depends(get_db)):
+    return {"status": "success"}
+
 @app.get("/posts")
 async def get_posts():
     cursor.execute("""SELECT * FROM posts""")
