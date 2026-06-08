@@ -10,18 +10,11 @@ import time
 from sqlalchemy.orm import Session
 from fastapi import Depends
 from . import models
-from .database import engine, sessionlocal
+from .database import engine, get_db
 
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
-
-def get_db():
-    db = sessionlocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 class Post(BaseModel):
     title: str
@@ -42,8 +35,6 @@ while True:
         print("Error: ", error)
         time.sleep(2)
 
-    
-
 my_posts = [{"title": "title of post 1", "content": "content of post 1", "published": True, "rating": 5, "id": 1}, 
             {"title": "favorite foods", "content": "I like pizza", "published": False, "id": 2}]
 
@@ -57,89 +48,48 @@ def find_index_post(id):
         if p["id"] == id:
             return i
 
-
 @app.get("/")
 async def root():
     return {"message": "Welcom to my first api"}
 
-# @app.get("/posts")
-# async def get_posts():
-#    return {"data": my_posts}
-
 @app.get("/sqlalchemy")
 def test_posts(db: Session = Depends(get_db)):
-    return {"status": "success"}
+    post = db.query(models.Post).all()
+    return {"data": post}
 
 @app.get("/posts")
-async def get_posts():
-    cursor.execute("""SELECT * FROM posts""")
-    posts = cursor.fetchall()
+async def get_posts(db: Session = Depends(get_db)):
+    # cursor.execute("""SELECT * FROM posts""")
+    # posts = cursor.fetchall()
+    posts = db.query(models.Post).all()
     return {"data": posts}
 
-# @app.post("/createpost")
-# def create_post(payload: dict = Body(...)):
-#    print(payload)
-#    return {"newpost": f"title: {payload['title']} content: {payload['content']}"}
-
-# title str, content str, category str, published bool
-
-# @app.post("/posts", status_code=status.HTTP_201_CREATED)
-# def create_post(post: Post):
-    # print(post.dict())
-#    post_dict = post.dict()
-#    post_dict["id"] = randrange(0, 1000000)
-#    my_posts.append(post_dict)
-#    return {"data": post_dict}
 
 @app.post("/posts", status_code=status.HTTP_201_CREATED)
-def create_post(post: Post):
-    cursor.execute("""INSERT INTO posts (title, content, published) VALUES (%s, %s, %s) RETURNING *""", 
-                    (post.title, post.content, post.published))
-    new_post = cursor.fetchone()
+def create_post(post: Post, db: Session = Depends(get_db)):
+    # cursor.execute("""INSERT INTO posts (title, content, published) VALUES (%s, %s, %s) RETURNING *""", 
+    #                (post.title, post.content, post.published))
+    # new_post = cursor.fetchone()
 
-    conn.commit()
+    # conn.commit()
+
+    new_post = models.Post(**post.dict())
+    db.add(new_post)
+    db.commit()
+    db.refresh(new_post)
 
     return {"data": new_post}
 
-# @app.get("/posts/latest")
-# def get_latest_post():
-#    post = my_posts[len(my_posts) - 1]
-#    return {"latest_post": post}
-
-# @app.get("/posts/{id}")
-# def get_post(id: int, response: Response):
-# def get_post(id: int):
-#    post = find_post(id)
-#    if not post:
-#            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
-#                                detail=f"post with id: {id} was not found")
-        # response.status_code = 404
-        # response.status_code = status.HTTP_404_NOT_FOUND
-        # return {"message": f"post with id: {id} was not found"}
-#    return {"post_detail": post}
-
 @app.get("/posts/{id}")
-def get_post(id: int):
-    cursor.execute("""SELECT * FROM posts WHERE id = %s""", (str(id),))
-    post = cursor.fetchone()
+def get_post(id: int, db: Session = Depends(get_db)):
+    # cursor.execute("""SELECT * FROM posts WHERE id = %s""", (str(id),))
+    # post = cursor.fetchone()
+    post = db.query(models.Post).filter(models.Post.id == id).first()
     if not post:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
                                 detail=f"post with id: {id} was not found")
     return {"post_detail": post}
 
-# @app.delete("/posts/{id}", status_code=status.HTTP_204_NO_CONTENT)
-# def delete_post(id: int):
-    # deleting post
-    # find the index in the array that has required id
-    # my_posts.pop(index)
-    # index = find_index_post(id)
-
-    # if index == None:
-    #   raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
-    #                        detail=f"post with id: {id} was not found")
-    # my_posts.pop(index)
-    # return {"message": f"post with id: {id} was successfully deleted"}
-    # return Response(status_code=status.HTTP_204_NO_CONTENT)
 @app.delete("/posts/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_post(id: int):
 
@@ -151,18 +101,6 @@ def delete_post(id: int):
                             detail=f"post with id: {id} was not found")
     
     return Response(status_code=status.HTTP_204_NO_CONTENT)
-
-# @app.put("/posts/{id}")
-# def update_post(id: int, post: Post):
-#    print(post)
-#    index = find_index_post(id)
-#    if index == None:
-#        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
-#                            detail=f"post with id: {id} was not found")
-#    post_dict = post.dict()
-#    post_dict["id"] = id
-#    my_posts[index] = post_dict
-#    return {"data": post_dict}
 
 @app.put("/posts/{id}")
 def update_post(id: int, post: Post):
