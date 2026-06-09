@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 
 from fastapi import FastAPI, Response, status, HTTPException
 from fastapi.params import Body
@@ -48,7 +48,7 @@ def find_index_post(id):
 async def root():
     return {"message": "Welcom to my first api"}
 
-@app.get("/posts")
+@app.get("/posts", response_model=list[schemas.Post])
 # async def get_posts(db: Session = Depends(get_db)):
 def get_posts(db: Session = Depends(get_db)):
     # cursor.execute("""SELECT * FROM posts""")
@@ -74,7 +74,7 @@ def create_post(post: schemas.PostCreate, db: Session = Depends(get_db)):
     # return {"data": new_post}
     return new_post
 
-@app.get("/posts/{id}")
+@app.get("/posts/{id}", response_model=schemas.Post)
 def get_post(id: int, db: Session = Depends(get_db)):
     # cursor.execute("""SELECT * FROM posts WHERE id = %s""", (str(id),))
     # post = cursor.fetchone()
@@ -104,7 +104,7 @@ def delete_post(id: int, db: Session = Depends(get_db)):
     
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
-@app.put("/posts/{id}")
+@app.put("/posts/{id}", response_model=schemas.Post)
 def update_post(id: int, post: schemas.PostCreate, db: Session = Depends(get_db)):
     # cursor.execute("""UPDATE posts SET title = %s, content = %s, published = %s WHERE id = %s RETURNING * """, 
     #               (post.title, post.content, post.published, str(id)))
