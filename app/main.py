@@ -49,7 +49,8 @@ async def root():
     return {"message": "Welcom to my first api"}
 
 @app.get("/posts")
-async def get_posts(db: Session = Depends(get_db)):
+# async def get_posts(db: Session = Depends(get_db)):
+def get_posts(db: Session = Depends(get_db)):
     # cursor.execute("""SELECT * FROM posts""")
     # posts = cursor.fetchall()
     posts = db.query(models.Post).all()
