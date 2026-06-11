@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 from fastapi import Depends
 # from . import models, schemas, utils
 # from .database import engine, get_db
-from app.routers import post, user
+from app.routers import auth, post, user
 
 
 # models.Base.metadata.create_all(bind=engine)
@@ -50,6 +50,7 @@ def find_index_post(id):
 
 app.include_router(post.router)
 app.include_router(user.router)
+app.include_router(auth.router)
 
 @app.get("/")
 async def root():
