@@ -1,4 +1,8 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent
+ENV_PATH = BASE_DIR / ".env"
 
 class Settings(BaseSettings):
     database_hostname: str
@@ -11,6 +15,6 @@ class Settings(BaseSettings):
     access_token_expire_time: int
 
     class Config:
-        model_config = SettingsConfigDict(env_file=".env")
+        model_config = SettingsConfigDict(env_file=ENV_PATH)
 
 settings = Settings()
