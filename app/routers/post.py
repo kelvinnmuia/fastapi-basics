@@ -18,11 +18,19 @@ def get_posts(db: Session = Depends(get_db), current_user: int = Depends(oauth2.
     # cursor.execute("""SELECT * FROM posts""")
     # posts = cursor.fetchall()
     # posts = db.query(models.Post).filter(models.Post.owner_id == current_user.id).all()
-    print(limit)
+    # print(limit)
     # posts = db.query(models.Post).filter(models.Post.title.contains(search)).limit(limit).offset(skip).all()
     # return {"data": posts}
     
-    results = db.query(models.Post, func.count(models.Vote.post_id).label("likes")).join(models.Vote, models.Vote.post_id == models.Post.id, isouter=True).group_by(models.Post.id).all()
+    posts = (
+    db.query(models.Post, func.count(models.Vote.post_id).label("likes"))
+    .join(models.Vote, models.Vote.post_id == models.Post.id, isouter=True)
+    .group_by(models.Post.id)
+    .filter(models.Post.title.contains(search))
+    .limit(limit)
+    .offset(skip)
+    .all()
+    )
     
     # return [
     # {
@@ -32,7 +40,7 @@ def get_posts(db: Session = Depends(get_db), current_user: int = Depends(oauth2.
     # for row in results
 # ]
     
-    return results
+    return posts
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.Post)
