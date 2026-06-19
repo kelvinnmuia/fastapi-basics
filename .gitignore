@@ -73,7 +73,7 @@ poetry.lock
 # PEP 582
 __pypackages__/
 
-# Environments
+# Environments Variables Files
 .env
 .env.*
 .venv/
