@@ -74,6 +74,7 @@ poetry.lock
 __pypackages__/
 
 # Environments Variables Files
+.env.local
 .env
 .env.*
 .venv/
