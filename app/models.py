@@ -36,4 +36,3 @@ class Vote(Base):
 
 
 # create all tables (ensure models are defined before creating)
-# Base.metadata.create_all(bind=engine)
