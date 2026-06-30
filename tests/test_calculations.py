@@ -1,4 +1,4 @@
-# sample test cases
+# sample test cases for calculations module
 
 import pytest
 from app.calculations import add, subtract, multiply, divide, BankAccount
