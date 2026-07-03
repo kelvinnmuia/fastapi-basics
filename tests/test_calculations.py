@@ -1,7 +1,7 @@
 # sample test cases for calculations module
 
 import pytest
-from app.calculations import add, subtract, multiply, divide, BankAccount
+from app.calculations import add, subtract, multiply, divide, BankAccount, InsufficientFunds
 
 
 @pytest.fixture()
@@ -62,3 +62,20 @@ def test_collect_interest(bank_account):
     # bank_account = BankAccount(100)
     bank_account.collect_interest()
     assert round(bank_account.balance, 6) == 110
+    
+    
+@pytest.mark.parametrize("deposited, withdrew, expected", 
+                         [(200, 100, 100), 
+                          (10, 2, 8), 
+                          (1500, 500, 1000),])
+
+def test_bank_transaction(zero_bank_account, deposited, withdrew, expected):
+    # bank_account = BankAccount()
+    zero_bank_account.deposit(deposited)
+    zero_bank_account.withdraw(withdrew)
+    assert zero_bank_account.balance == expected
+    
+
+def test_insufficient_funds(bank_account):
+    with pytest.raises(InsufficientFunds):
+        bank_account.withdraw(200)
