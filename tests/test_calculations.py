@@ -39,8 +39,8 @@ def test_divide():
     assert divide(10, 2) == 5
 
     
-def test_bank_set_initial_balance():
-    bank_account = BankAccount(100)
+def test_bank_set_initial_balance(bank_account):
+    # bank_account = BankAccount(100)
     assert bank_account.balance == 100
     
 def test_bank_default_amount(zero_bank_account):
@@ -48,17 +48,17 @@ def test_bank_default_amount(zero_bank_account):
     print("testing bank account with default amount")
     assert zero_bank_account.balance == 0
     
-def test_withdraw():
-    bank_account = BankAccount(100)
+def test_withdraw(bank_account):
+    # bank_account = BankAccount(100)
     bank_account.withdraw(50)
     assert bank_account.balance == 50
     
-def test_deposit():
-    bank_account = BankAccount(100)
+def test_deposit(bank_account):
+    # bank_account = BankAccount(100)
     bank_account.deposit(50)
     assert bank_account.balance == 150
     
-def test_collect_interest():
-    bank_account = BankAccount(100)
+def test_collect_interest(bank_account):
+    # bank_account = BankAccount(100)
     bank_account.collect_interest()
     assert round(bank_account.balance, 6) == 110
