@@ -1,4 +1,5 @@
 from fastapi.testclient import TestClient
+import pytest
 from app.main import app
 from app import schemas
 from app.config import settings
@@ -14,8 +15,6 @@ engine = create_engine(SQLALCHEMY_DATABASE_URL)
 
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-Base.metadata.create_all(bind=engine)
-
 # Base = declarative_base()
 def override_get_db():
     db = TestingSessionLocal()
@@ -26,16 +25,19 @@ def override_get_db():
         
 app.dependency_overrides[get_db] = override_get_db
 
-client = TestClient(app)
+@pytest.fixture
+def client():
+    Base.metadata.create_all(bind=engine)
+    yield TestClient(app)
+    Base.metadata.drop_all(bind=engine)
 
-def test_root():
-    
+def test_root(client):
     res = client.get("/")
     print(res.json())
     assert res.json().get("message") == "Welcome to my first api in python"
     assert res.status_code == 200
     
-def test_create_user():
+def test_create_user(client):
     res = client.post("/users/", json={"email": "hall3@mail.com", "password": "hall3pwd123"})
     # print(res.json())
     new_user = schemas.UserOut(**res.json())
