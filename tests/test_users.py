@@ -7,6 +7,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from app.database import get_db, Base
+from alembic import command
 
 # SQLALCHEMY_DATABASE_URL = f"postgresql://postgres:P0stgres26@localhost:5432/fastapi_test"
 SQLALCHEMY_DATABASE_URL = f"postgresql://{settings.database_username}:{settings.database_password}@{settings.database_hostname}:{settings.database_port}/{settings.database_name}_test"
@@ -25,12 +26,15 @@ def override_get_db():
         
 app.dependency_overrides[get_db] = override_get_db
 
+@pytest.fixture(scope="function")
 @pytest.fixture
 def client():
+    # command.upgrade("head")
+    Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
     yield TestClient(app)
-    Base.metadata.drop_all(bind=engine)
-
+    # command.downgrade("base")
+    
 def test_root(client):
     res = client.get("/")
     print(res.json())
