@@ -26,7 +26,7 @@ def override_get_db():
         
 app.dependency_overrides[get_db] = override_get_db
 
-@pytest.fixture(scope="function")
+# @pytest.fixture(scope="function")
 @pytest.fixture
 def client():
     # command.upgrade("head")
