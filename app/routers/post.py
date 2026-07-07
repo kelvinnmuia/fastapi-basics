@@ -66,11 +66,19 @@ def get_post(id: int, db: Session = Depends(get_db), current_user: int = Depends
     # post = cursor.fetchone()
     # post = db.query(models.Post).filter(models.Post.id == id).first()
     
+    # post = (
+    # db.query(models.Post, func.count(models.Vote.post_id).label("likes"))
+    # .join(models.Vote, models.Vote.post_id == models.Post.id, isouter=True)
+    # .group_by(models.Post.id)
+    # .first()
+    # )
+    
     post = (
-    db.query(models.Post, func.count(models.Vote.post_id).label("likes"))
-    .join(models.Vote, models.Vote.post_id == models.Post.id, isouter=True)
-    .group_by(models.Post.id)
-    .first()
+        db.query(models.Post, func.count(models.Vote.post_id).label("likes"))
+        .join(models.Vote, models.Vote.post_id == models.Post.id, isouter=True)
+        .filter(models.Post.id == id)  #  Added missing filter
+        .group_by(models.Post.id)
+        .first()
     )
     
     if not post:

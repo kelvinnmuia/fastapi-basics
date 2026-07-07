@@ -8,6 +8,8 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from app.database import get_db, Base
 from alembic import command
+from app.oauth2 import create_access_token
+from app import models
 
 # SQLALCHEMY_DATABASE_URL = f"postgresql://postgres:P0stgres26@localhost:5432/fastapi_test"
 SQLALCHEMY_DATABASE_URL = f"postgresql://{settings.database_username}:{settings.database_password}@{settings.database_hostname}:{settings.database_port}/{settings.database_name}_test"
@@ -25,10 +27,19 @@ TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engin
 #         db.close()
         
 # app.dependency_overrides[get_db] = override_get_db
+@pytest.fixture
+def test_user(client):
+    user_data = {"email": "hall3@mail.com", "password": "hall3pwd123"}
+    res = client.post("/users/", json=user_data)
+    assert res.status_code == 201
+    # print(res.json())
+    new_user = res.json()
+    new_user['password'] = user_data['password']
+    return new_user
 
 @pytest.fixture(scope="function")
 def session():
-    print("the session fixture is running")
+    # print("the session fixture is running")
     # command.upgrade("head")
     Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
@@ -48,3 +59,39 @@ def client(session):
             session.close() 
     app.dependency_overrides[get_db] = override_get_db
     yield TestClient(app)
+    
+@pytest.fixture
+def token(test_user):
+    return create_access_token({"user_id": test_user['id']})
+
+@pytest.fixture
+def authorized_client(client, token):
+    client.headers = {
+        **client.headers,
+        "Authorization": f"Bearer {token}"
+    }
+    return client
+
+@pytest.fixture
+def test_posts(test_user, session):
+    posts_data = [
+        {"title": "first title", "content": "first content", "owner_id": test_user['id']},
+        {"title": "second title", "content": "second content", "owner_id": test_user['id']},
+        {"title": "third title", "content": "third content", "owner_id": test_user['id']}
+    ]
+    
+    # for post in posts_data:
+    #     session.add(models.Post(**post))
+    
+    def create_post_model(post):
+        return models.Post(**post)
+    mapped_posts = map(create_post_model, posts_data)
+    posts = list(mapped_posts)
+    
+    session.add_all(posts)
+    session.commit()
+    
+    posts = session.query(models.Post).all()
+    return posts
+  
+    
