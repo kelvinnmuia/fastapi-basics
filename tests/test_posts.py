@@ -55,3 +55,7 @@ def test_create_post_default_published_true(authorized_client, test_user, test_p
     assert created_post.published == True
     assert created_post.owner_id == test_user['id']
     assert res.status_code == 201
+    
+def test_unauthorized_create_posts(client, test_user, test_posts):
+    res = client.post("/posts/", json={"title": "arbitrary title", "content": "arbitrary content"})
+    assert res.status_code == 401
