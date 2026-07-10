@@ -8,6 +8,7 @@
 # from sqlalchemy.ext.declarative import declarative_base
 # from app.database import get_db, Base
 # from alembic import command
+# from app.oauth2 import create_access_token
 
 # # SQLALCHEMY_DATABASE_URL = f"postgresql://postgres:P0stgres26@localhost:5432/fastapi_test"
 # SQLALCHEMY_DATABASE_URL = f"postgresql://{settings.database_username}:{settings.database_password}@{settings.database_hostname}:{settings.database_port}/{settings.database_name}_test"
