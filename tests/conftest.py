@@ -27,6 +27,17 @@ TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engin
 #         db.close()
         
 # app.dependency_overrides[get_db] = override_get_db
+
+@pytest.fixture
+def test_user2(client):
+    user_data = {"email": "hann@mail.com", "password": "hannpwd123"}
+    res = client.post("/users/", json=user_data)
+    assert res.status_code == 201
+    # print(res.json())
+    new_user = res.json()
+    new_user['password'] = user_data['password']
+    return new_user
+
 @pytest.fixture
 def test_user(client):
     user_data = {"email": "hall3@mail.com", "password": "hall3pwd123"}
@@ -73,11 +84,12 @@ def authorized_client(client, token):
     return client
 
 @pytest.fixture
-def test_posts(test_user, session):
+def test_posts(test_user, session, test_user2):
     posts_data = [
         {"title": "first title", "content": "first content", "owner_id": test_user['id']},
         {"title": "second title", "content": "second content", "owner_id": test_user['id']},
-        {"title": "third title", "content": "third content", "owner_id": test_user['id']}
+        {"title": "third title", "content": "third content", "owner_id": test_user['id']},
+        {"title": "fourth title", "content": "fourth content", "owner_id": test_user2['id']}
     ]
     
     # for post in posts_data:
