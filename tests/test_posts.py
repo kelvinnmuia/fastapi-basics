@@ -59,3 +59,7 @@ def test_create_post_default_published_true(authorized_client, test_user, test_p
 def test_unauthorized_create_posts(client, test_user, test_posts):
     res = client.post("/posts/", json={"title": "arbitrary title", "content": "arbitrary content"})
     assert res.status_code == 401
+    
+def test_unauthorized_user_delete_post(client, test_user, test_posts):
+    res = client.delete("/posts/test_posts[0].id")
+    assert res.status_code == 401
