@@ -6,7 +6,7 @@
 #       - main
 #   pull_request:
 #     branches:
-#       - main
+#       - main branch
 
 name: Build and Deploy Code
 
