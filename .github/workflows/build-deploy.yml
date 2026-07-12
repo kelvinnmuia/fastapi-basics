@@ -95,9 +95,9 @@ jobs:
       name: production
     steps:
       - name: Deploying to production server
-        uses: actions/checkout@master 
+        uses: actions/checkout@v4 
       - name: Create deployment
-        uses: sws2apps/render-deployment@master
+        uses: sws2apps/render-deployment@main
         with:
           serviceId: ${{ secrets.RENDER_SERVICE_ID }}
           apiKey: ${{ secrets.RENDER_API_KEY }}
